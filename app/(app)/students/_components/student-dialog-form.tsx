@@ -11,8 +11,14 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useToast } from '@/components/ui/use-toast';
+import { db } from '@/lib/firebase';
 import { Student } from '@/lib/types';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { addDoc, collection, doc, updateDoc } from 'firebase/firestore';
+import { Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -35,6 +41,7 @@ export default function StudentDialogForm({
   open,
   onClose,
 }: StudentForm) {
+  const [isLoading, setIsLoading] = useState(false);
   const form = useForm<FormData>({
     resolver: zodResolver(schema),
     values: student
@@ -44,11 +51,42 @@ export default function StudentDialogForm({
       : undefined,
   });
 
+  const router = useRouter();
+  const { toast } = useToast();
+
   const onSubmit = async (data: FormData) => {
     if (student) {
-      // Update
+      try {
+        setIsLoading(true);
+        await updateDoc(doc(db, 'students', student.id), {
+          name: data.name,
+          nameInput: data.name.split(' ').join('').toLowerCase(),
+        });
+        toast({ title: 'Updated student' });
+        onClose();
+        router.refresh();
+      } catch (_) {
+        toast({ title: 'Updating student failed', variant: 'destructive' });
+      } finally {
+        setIsLoading(false);
+      }
     } else {
-      // Create
+      try {
+        setIsLoading(true);
+        await addDoc(collection(db, 'students'), {
+          name: data.name,
+          nameInput: data.name.split(' ').join('').toLowerCase(),
+          createdAt: new Date().getTime(),
+        });
+        form.reset({ name: '' });
+        toast({ title: 'Added student' });
+        onClose();
+        router.refresh();
+      } catch (_) {
+        toast({ title: 'Adding student failed', variant: 'destructive' });
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -76,7 +114,10 @@ export default function StudentDialogForm({
                 Close
               </Button>
             </DialogClose>
-            <Button type='submit'>{student ? 'Update' : 'Add'}</Button>
+            <Button type='submit' disabled={isLoading}>
+              {isLoading && <Loader2 className='animate-spin w-4 h-4 mr-2' />}
+              {student ? 'Update' : 'Add'}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
