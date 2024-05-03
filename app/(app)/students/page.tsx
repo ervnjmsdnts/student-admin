@@ -47,8 +47,11 @@ export default function StudentsPage() {
         const students = snapshot.docs.map((doc) => {
           const data = doc.data();
           return { ...data, id: doc.id };
-        });
-        setStudents(students as Student[]);
+        }) as Student[];
+        const sortedStudents = students.sort(
+          (a, b) => b.createdAt - a.createdAt,
+        );
+        setStudents(sortedStudents);
         setIsLoading(false);
       });
 

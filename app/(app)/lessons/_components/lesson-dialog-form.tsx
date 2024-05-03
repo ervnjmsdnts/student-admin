@@ -11,8 +11,15 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useToast } from '@/components/ui/use-toast';
+import { db, storage } from '@/lib/firebase';
 import { Lesson } from '@/lib/types';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { addDoc, collection, doc, updateDoc } from 'firebase/firestore';
+import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
+import { Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -57,6 +64,8 @@ export default function LessonDialogForm({
   open,
   onClose,
 }: LessonForm) {
+  const [isLoading, setIsLoading] = useState(false);
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     values: lesson
@@ -66,12 +75,70 @@ export default function LessonDialogForm({
       : undefined,
   });
 
+  const { toast } = useToast();
+  const router = useRouter();
+
   const onSubmit = async (data: FormData) => {
+    const file = data.file as FileList;
+    const fileRef = ref(storage, `pdfs/${file[0].name}`);
+    const uploadFile = uploadBytesResumable(fileRef, file[0]);
+
+    setIsLoading(true);
+
     if (lesson) {
-      // Update
+      try {
+        uploadFile.on(
+          'state_changed',
+          () => {},
+          (error) => {
+            toast({ title: error.message, variant: 'destructive' });
+          },
+          async () => {
+            const url = await getDownloadURL(uploadFile.snapshot.ref);
+
+            await updateDoc(doc(db, 'lessons', lesson.id), {
+              name: data.name,
+              fileName: file[0].name,
+              url,
+            });
+
+            toast({ title: 'Lesson updated' });
+            onClose();
+            router.refresh();
+          },
+        );
+      } catch (_) {
+        toast({ title: 'Updating lesson failed', variant: 'destructive' });
+      }
     } else {
-      // Create
+      try {
+        uploadFile.on(
+          'state_changed',
+          () => {},
+          (error) => {
+            toast({ title: error.message, variant: 'destructive' });
+          },
+          async () => {
+            const url = await getDownloadURL(uploadFile.snapshot.ref);
+
+            await addDoc(collection(db, 'lessons'), {
+              name: data.name,
+              fileName: file[0].name,
+              url,
+              createdAt: new Date().getTime(),
+            });
+
+            form.reset({ name: '', file: null });
+            toast({ title: 'Lesson added' });
+            onClose();
+            router.refresh();
+          },
+        );
+      } catch (_) {
+        toast({ title: 'Adding lesson failed', variant: 'destructive' });
+      }
     }
+    setIsLoading(false);
   };
 
   return (
@@ -91,7 +158,7 @@ export default function LessonDialogForm({
             )}
           </div>
           <div className='grid gap-2'>
-            <Label htmlFor='file'>Name</Label>
+            <Label htmlFor='file'>File</Label>
             <Input id='file' type='file' {...form.register('file')} />
             {form.formState.errors.file?.message && (
               <span className='text-sm text-red-400'>
@@ -105,7 +172,10 @@ export default function LessonDialogForm({
                 Close
               </Button>
             </DialogClose>
-            <Button type='submit'>{lesson ? 'Update' : 'Add'}</Button>
+            <Button type='submit' disabled={isLoading}>
+              {isLoading && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
+              {lesson ? 'Update' : 'Add'}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

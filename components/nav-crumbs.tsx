@@ -37,7 +37,7 @@ export default function NavCrumbs() {
                 <ChevronRight className='w-4 h-4' />
               </>
             ) : (
-              <BreadcrumbPage className='max-w-20 truncate md:max-w-none'>
+              <BreadcrumbPage className='max-w-20 truncate font-bold md:max-w-none'>
                 {capitalizePath(path)}
               </BreadcrumbPage>
             )}

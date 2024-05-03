@@ -12,3 +12,16 @@ export type Lesson = {
   url: string;
   createdAt: number;
 };
+
+export type Activity = {
+  id: string;
+  name: string;
+  createdAt: number;
+  questions: {
+    imageUrl: string | null;
+    imageName: string | null;
+    question: string;
+    options: string[];
+    answer: number;
+  }[];
+};
