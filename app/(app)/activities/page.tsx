@@ -105,9 +105,7 @@ export default function ActivitiesPage() {
                             {activity.name}
                           </TableCell>
                           <TableCell className='font-medium'>
-                            <Button className='p-0' variant='link'>
-                              {activity.questions.length}
-                            </Button>
+                            {activity.questions.length}
                           </TableCell>
                           <TableCell>
                             <div className='flex gap-2 items-center'>

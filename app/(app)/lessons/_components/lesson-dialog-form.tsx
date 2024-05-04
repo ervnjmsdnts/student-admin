@@ -11,6 +11,13 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
 import { db, storage } from '@/lib/firebase';
 import { Lesson } from '@/lib/types';
@@ -20,7 +27,7 @@ import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 type LessonForm = {
@@ -34,10 +41,9 @@ const MAX_FILE_SIZE = 5000000;
 
 const fileSchema = z
   .any()
-  .optional()
   .refine(
     (file) =>
-      file.length == 1
+      file?.length == 1
         ? ACCEPTED_TYPES.includes(file?.[0]?.type)
           ? true
           : false
@@ -46,14 +52,30 @@ const fileSchema = z
   )
   .refine(
     (file) =>
-      file.length == 1 ? (file[0]?.size <= MAX_FILE_SIZE ? true : false) : true,
+      file?.length == 1
+        ? file[0]?.size <= MAX_FILE_SIZE
+          ? true
+          : false
+        : true,
     'Max file size allowed is 5MB.',
-  );
+  )
+  .refine((file) => file && file.length > 0, 'Field is required');
 
 const formSchema = z.object({
   name: z
     .string({ required_error: 'Field is required' })
     .min(1, 'Field is required'),
+  subject: z.enum(['english', 'filipino', 'math'], {
+    required_error: 'Field is required',
+    message: 'Field is required',
+  }),
+  type: z.enum(
+    ['quarter 1', 'quarter 2', 'quarter 3', 'quarter 4', 'advanced'],
+    {
+      required_error: 'Field is required',
+      message: 'Field is required',
+    },
+  ),
   file: fileSchema,
 });
 
@@ -71,6 +93,8 @@ export default function LessonDialogForm({
     values: lesson
       ? {
           name: lesson.name,
+          subject: lesson.subject,
+          type: lesson.type,
         }
       : undefined,
   });
@@ -79,8 +103,9 @@ export default function LessonDialogForm({
   const router = useRouter();
 
   const onSubmit = async (data: FormData) => {
+    console.log(data);
     const file = data.file as FileList;
-    const fileRef = ref(storage, `pdfs/${file[0].name}`);
+    const fileRef = ref(storage, `pdfs/${file[0]?.name}`);
     const uploadFile = uploadBytesResumable(fileRef, file[0]);
 
     setIsLoading(true);
@@ -99,6 +124,8 @@ export default function LessonDialogForm({
             await updateDoc(doc(db, 'lessons', lesson.id), {
               name: data.name,
               fileName: file[0].name,
+              subject: data.subject,
+              type: data.type,
               url,
             });
 
@@ -124,11 +151,18 @@ export default function LessonDialogForm({
             await addDoc(collection(db, 'lessons'), {
               name: data.name,
               fileName: file[0].name,
+              subject: data.subject,
+              type: data.type,
               url,
               createdAt: new Date().getTime(),
             });
 
-            form.reset({ name: '', file: null });
+            form.reset({
+              name: '',
+              file: null,
+              type: 'quarter 1',
+              subject: 'english',
+            });
             toast({ title: 'Lesson added' });
             onClose();
             router.refresh();
@@ -154,6 +188,60 @@ export default function LessonDialogForm({
             {form.formState.errors.name?.message && (
               <span className='text-sm text-red-400'>
                 {form.formState.errors.name.message}
+              </span>
+            )}
+          </div>
+          <div className='grid gap-2'>
+            <Label htmlFor='name'>Subject</Label>
+            <Controller
+              control={form.control}
+              name='subject'
+              render={({ field }) => (
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}>
+                  <SelectTrigger>
+                    <SelectValue placeholder='Select a subject' />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value='english'>English</SelectItem>
+                    <SelectItem value='filipino'>Filipino</SelectItem>
+                    <SelectItem value='math'>Mathematics</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {form.formState.errors.subject?.message && (
+              <span className='text-sm text-red-400'>
+                {form.formState.errors.subject.message}
+              </span>
+            )}
+          </div>
+          <div className='grid gap-2'>
+            <Label htmlFor='name'>Type</Label>
+            <Controller
+              control={form.control}
+              name='type'
+              render={({ field }) => (
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}>
+                  <SelectTrigger>
+                    <SelectValue placeholder='Select a type' />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value='quarter 1'>Quarter 1</SelectItem>
+                    <SelectItem value='quarter 2'>Quarter 2</SelectItem>
+                    <SelectItem value='quarter 3'>Quarter 3</SelectItem>
+                    <SelectItem value='quarter 4'>Quarter 4</SelectItem>
+                    <SelectItem value='advanced'>Advanced</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {form.formState.errors.subject?.message && (
+              <span className='text-sm text-red-400'>
+                {form.formState.errors.subject.message}
               </span>
             )}
           </div>

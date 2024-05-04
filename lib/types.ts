@@ -8,6 +8,8 @@ export type Student = {
 export type Lesson = {
   id: string;
   name: string;
+  subject: 'english' | 'filipino' | 'math';
+  type: 'quarter 1' | 'quarter 2' | 'quarter 3' | 'quarter 4' | 'advanced';
   fileName: string;
   url: string;
   createdAt: number;

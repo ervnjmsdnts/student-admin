@@ -1,3 +1,5 @@
+'use client';
+
 import { LogOut, User } from 'lucide-react';
 import { Avatar, AvatarFallback } from './ui/avatar';
 import {
@@ -7,8 +9,18 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 import Link from 'next/link';
+import { signOut } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 
 export default function NavBar() {
+  const handleLogout = async () => {
+    await signOut(auth);
+
+    await fetch('/api/logout');
+
+    window.location.reload();
+  };
+
   return (
     <nav className='bg-primary p-4 text-primary-foreground'>
       <div className='flex justify-between items-center'>
@@ -27,7 +39,7 @@ export default function NavBar() {
             </Avatar>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
               <LogOut className='mr-2 h-4 w-4' />
               <span>Log out</span>
             </DropdownMenuItem>

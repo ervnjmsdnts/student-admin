@@ -23,20 +23,6 @@ import { useEffect, useState } from 'react';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
-const items = [
-  { name: 'Lesson', file: 'File' },
-  { name: 'Lesson', file: 'File' },
-  { name: 'Lesson', file: 'File' },
-  { name: 'Lesson', file: 'File' },
-  { name: 'Lesson', file: 'File' },
-  { name: 'Lesson', file: 'File' },
-  { name: 'Lesson', file: 'File' },
-  { name: 'Lesson', file: 'File' },
-  { name: 'Lesson', file: 'File' },
-  { name: 'Lesson', file: 'File' },
-  { name: 'Lesson', file: 'File' },
-];
-
 export default function LessonsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [lessons, setLessons] = useState<Lesson[]>([]);
@@ -105,8 +91,10 @@ export default function LessonsPage() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className='w-1/2'>Name</TableHead>
-                        <TableHead className='w-1/2'>File</TableHead>
+                        <TableHead className='w-1/4'>Name</TableHead>
+                        <TableHead className='w-1/4'>File</TableHead>
+                        <TableHead className='w-1/4'>Subject</TableHead>
+                        <TableHead className='w-1/4'>Type</TableHead>
                         <TableHead className='text-center'>Actions</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -117,12 +105,22 @@ export default function LessonsPage() {
                             {lesson.name}
                           </TableCell>
                           <TableCell className='font-medium'>
-                            <Button className='p-0' variant='link' asChild>
-                              <Link target='_blank' href={lesson.url}>
-                                <FileText className='mr-2 w-4 h-4' />{' '}
-                                {lesson.fileName}
-                              </Link>
-                            </Button>
+                            {lesson.fileName && lesson.url && (
+                              <Button className='p-0' variant='link' asChild>
+                                <Link target='_blank' href={lesson.url}>
+                                  <FileText className='mr-2 w-4 h-4' />{' '}
+                                  {lesson.fileName}
+                                </Link>
+                              </Button>
+                            )}
+                          </TableCell>
+                          <TableCell className='font-medium'>
+                            {lesson.subject.charAt(0).toUpperCase() +
+                              lesson.subject.slice(1)}
+                          </TableCell>
+                          <TableCell className='font-medium'>
+                            {lesson.type.charAt(0).toUpperCase() +
+                              lesson.type.slice(1)}
                           </TableCell>
                           <TableCell>
                             <div className='flex gap-2 items-center'>
