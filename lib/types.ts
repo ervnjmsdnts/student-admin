@@ -9,7 +9,7 @@ export type Lesson = {
   id: string;
   name: string;
   subject: 'english' | 'filipino' | 'math';
-  type: 'quarter 1' | 'quarter 2' | 'quarter 3' | 'quarter 4' | 'advanced';
+  type: '1st' | '2nd' | '3rd' | '4th' | 'advanced';
   fileName: string;
   url: string;
   createdAt: number;
@@ -18,6 +18,8 @@ export type Lesson = {
 export type Activity = {
   id: string;
   name: string;
+  subject: 'english' | 'filipino' | 'math';
+  type: '1st' | '2nd' | '3rd' | '4th';
   createdAt: number;
   questions: {
     imageUrl: string | null;

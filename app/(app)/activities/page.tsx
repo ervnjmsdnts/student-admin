@@ -91,10 +91,12 @@ export default function ActivitiesPage() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className='w-1/2'>Name</TableHead>
-                        <TableHead className='w-1/2'>
+                        <TableHead className='w-1/4'>Name</TableHead>
+                        <TableHead className='w-1/4'>
                           Number of Questions
                         </TableHead>
+                        <TableHead className='w-1/4'>Subject</TableHead>
+                        <TableHead className='w-1/4'>Type</TableHead>
                         <TableHead className='text-center'>Actions</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -106,6 +108,14 @@ export default function ActivitiesPage() {
                           </TableCell>
                           <TableCell className='font-medium'>
                             {activity.questions.length}
+                          </TableCell>
+                          <TableCell className='font-medium'>
+                            {activity.subject.charAt(0).toUpperCase() +
+                              activity.subject.slice(1)}
+                          </TableCell>
+                          <TableCell className='font-medium'>
+                            {activity.type.charAt(0).toUpperCase() +
+                              activity.type.slice(1)}
                           </TableCell>
                           <TableCell>
                             <div className='flex gap-2 items-center'>

@@ -9,6 +9,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -75,6 +82,14 @@ const formSchema = z.object({
   name: z
     .string({ required_error: 'Field is required' })
     .min(1, 'Field is required'),
+  subject: z.enum(['english', 'filipino', 'math'], {
+    required_error: 'Field is required',
+    message: 'Field is required',
+  }),
+  type: z.enum(['1st', '2nd', '3rd', '4th', 'advanced'], {
+    required_error: 'Field is required',
+    message: 'Field is required',
+  }),
   questions: questionSchema.array().min(1),
 });
 
@@ -99,6 +114,8 @@ export default function ActivityDialogForm({
     values: activity
       ? {
           name: activity.name,
+          subject: activity.subject,
+          type: activity.type,
           questions: activity.questions.map((q) => ({
             ...q,
             image: q.imageName,
@@ -160,6 +177,8 @@ export default function ActivityDialogForm({
       try {
         await updateDoc(doc(db, 'activities', activity.id), {
           name: data.name,
+          subject: data.subject,
+          type: data.type,
           questions,
         });
 
@@ -174,13 +193,20 @@ export default function ActivityDialogForm({
       try {
         await addDoc(collection(db, 'activities'), {
           name: data.name,
+          subject: data.subject,
+          type: data.type,
           questions,
           createdAt: new Date().getTime(),
         });
 
         toast({ title: 'Added activity' });
         onClose();
-        form.reset({ name: '', questions: [defaultFieldValues] });
+        form.reset({
+          name: '',
+          subject: 'english',
+          type: '1st',
+          questions: [defaultFieldValues],
+        });
         router.refresh();
       } catch (error) {
         toast({ title: 'Adding activity failed', variant: 'destructive' });
@@ -197,14 +223,67 @@ export default function ActivityDialogForm({
           </DialogTitle>
         </DialogHeader>
         <form
-          className='grid gap-2 max-h-96 overflow-auto'
+          className='grid gap-2 max-h-96 p-2 overflow-auto'
           onSubmit={form.handleSubmit(onSubmit)}>
-          <div className='grid gap-2 p-2'>
+          <div className='grid gap-2'>
             <Label htmlFor='name'>Name</Label>
             <Input id='name' {...form.register('name')} />
             {form.formState.errors.name?.message && (
               <span className='text-sm text-red-400'>
                 {form.formState.errors.name.message}
+              </span>
+            )}
+          </div>
+          <div className='grid gap-2'>
+            <Label htmlFor='name'>Subject</Label>
+            <Controller
+              control={form.control}
+              name='subject'
+              render={({ field }) => (
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}>
+                  <SelectTrigger>
+                    <SelectValue placeholder='Select a subject' />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value='english'>English</SelectItem>
+                    <SelectItem value='filipino'>Filipino</SelectItem>
+                    <SelectItem value='math'>Mathematics</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {form.formState.errors.subject?.message && (
+              <span className='text-sm text-red-400'>
+                {form.formState.errors.subject.message}
+              </span>
+            )}
+          </div>
+          <div className='grid gap-2'>
+            <Label htmlFor='name'>Type</Label>
+            <Controller
+              control={form.control}
+              name='type'
+              render={({ field }) => (
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}>
+                  <SelectTrigger>
+                    <SelectValue placeholder='Select a type' />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value='1st'>1st Quarter</SelectItem>
+                    <SelectItem value='2nd'>2nd Quarter</SelectItem>
+                    <SelectItem value='3rd'>3rd Quarter</SelectItem>
+                    <SelectItem value='4th'>4th Quarter</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {form.formState.errors.subject?.message && (
+              <span className='text-sm text-red-400'>
+                {form.formState.errors.subject.message}
               </span>
             )}
           </div>

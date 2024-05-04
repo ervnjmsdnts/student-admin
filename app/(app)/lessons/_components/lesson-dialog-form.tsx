@@ -69,13 +69,10 @@ const formSchema = z.object({
     required_error: 'Field is required',
     message: 'Field is required',
   }),
-  type: z.enum(
-    ['quarter 1', 'quarter 2', 'quarter 3', 'quarter 4', 'advanced'],
-    {
-      required_error: 'Field is required',
-      message: 'Field is required',
-    },
-  ),
+  type: z.enum(['1st', '2nd', '3rd', '4th', 'advanced'], {
+    required_error: 'Field is required',
+    message: 'Field is required',
+  }),
   file: fileSchema,
 });
 
@@ -160,7 +157,7 @@ export default function LessonDialogForm({
             form.reset({
               name: '',
               file: null,
-              type: 'quarter 1',
+              type: '1st',
               subject: 'english',
             });
             toast({ title: 'Lesson added' });
@@ -230,10 +227,10 @@ export default function LessonDialogForm({
                     <SelectValue placeholder='Select a type' />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value='quarter 1'>Quarter 1</SelectItem>
-                    <SelectItem value='quarter 2'>Quarter 2</SelectItem>
-                    <SelectItem value='quarter 3'>Quarter 3</SelectItem>
-                    <SelectItem value='quarter 4'>Quarter 4</SelectItem>
+                    <SelectItem value='1st'>1st Quarter</SelectItem>
+                    <SelectItem value='2nd'>2nd Quarter</SelectItem>
+                    <SelectItem value='3rd'>3rd Quarter</SelectItem>
+                    <SelectItem value='4th'>4th Quarter</SelectItem>
                     <SelectItem value='advanced'>Advanced</SelectItem>
                   </SelectContent>
                 </Select>
