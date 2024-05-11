@@ -29,6 +29,7 @@ export default function NavBar() {
           <Link href='/students'>Students</Link>
           <Link href='/lessons'>Lessons</Link>
           <Link href='/activities'>Activities</Link>
+          <Link href='/scores'>Scores</Link>
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger>

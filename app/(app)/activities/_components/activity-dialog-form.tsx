@@ -39,7 +39,7 @@ type ActivityForm = {
 };
 
 const ACCEPTED_TYPES = ['image/png', 'image/jpeg'];
-const MAX_FILE_SIZE = 5000000;
+const MAX_FILE_SIZE = 15000000;
 
 const fileSchema = z
   .any()
@@ -60,7 +60,7 @@ const fileSchema = z
           ? true
           : false
         : true,
-    'Max file size allowed is 5MB.',
+    'Max file size allowed is 15MB.',
   );
 
 const questionSchema = z.object({

@@ -17,7 +17,7 @@ export default function NavCrumbs() {
   const paths = pathname.split('/').filter((item) => item);
 
   const capitalizePath = (path: string) => {
-    return ['students', 'lessons', 'activities'].includes(path)
+    return ['students', 'lessons', 'activities', 'scores'].includes(path)
       ? path.charAt(0).toUpperCase() + path.slice(1)
       : path;
   };

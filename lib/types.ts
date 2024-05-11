@@ -29,3 +29,13 @@ export type Activity = {
     answer: number;
   }[];
 };
+
+export type Score = {
+  id: string;
+  createdAt: number;
+  quizName: string;
+  score: number;
+  studentName: string;
+  subject: string;
+  type: string;
+};

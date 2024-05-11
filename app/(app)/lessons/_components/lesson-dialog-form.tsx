@@ -37,7 +37,7 @@ type LessonForm = {
 };
 
 const ACCEPTED_TYPES = ['application/pdf'];
-const MAX_FILE_SIZE = 5000000;
+const MAX_FILE_SIZE = 50000000;
 
 const fileSchema = z
   .any()
@@ -57,7 +57,7 @@ const fileSchema = z
           ? true
           : false
         : true,
-    'Max file size allowed is 5MB.',
+    'Max file size allowed is 15MB.',
   )
   .refine((file) => file && file.length > 0, 'Field is required');
 
