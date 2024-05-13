@@ -59,7 +59,7 @@ export default function ScoresPage() {
                       <TableHead>Quiz Name</TableHead>
                       <TableHead>Score</TableHead>
                       <TableHead>Subject</TableHead>
-                      <TableHead>Type</TableHead>
+                      <TableHead>Quarter</TableHead>
                       <TableHead>Date & Time</TableHead>
                     </TableRow>
                   </TableHeader>

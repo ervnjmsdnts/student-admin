@@ -215,7 +215,7 @@ export default function LessonDialogForm({
             )}
           </div>
           <div className='grid gap-2'>
-            <Label htmlFor='name'>Type</Label>
+            <Label htmlFor='name'>Quarter</Label>
             <Controller
               control={form.control}
               name='type'

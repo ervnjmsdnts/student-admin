@@ -20,12 +20,28 @@ import { useEffect, useState } from 'react';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import DeleteDialog from '@/components/delete-dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 export default function ActivitiesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [activities, setActivities] = useState<Activity[]>([]);
+  const [selectedQuarter, setSelectedQuarter] = useState<string | undefined>(
+    undefined,
+  );
+
+  const sortedActivities =
+    selectedQuarter === 'all' || selectedQuarter === undefined
+      ? activities
+      : activities.filter((act) => act.type === selectedQuarter);
+
   const { currentItems, currentPage, paginate, totalPages } =
-    usePagination(activities);
+    usePagination(sortedActivities);
 
   const {
     handleCloseAdd,
@@ -83,9 +99,26 @@ export default function ActivitiesPage() {
         ) : (
           <>
             <div className='flex-grow flex w-full h-full gap-2 flex-col'>
-              <Button className='self-end' onClick={handleOpenAdd}>
-                Add Activity
-              </Button>
+              <div className='flex items-center justify-between'>
+                <Select
+                  value={selectedQuarter}
+                  defaultValue='all'
+                  onValueChange={(value) => setSelectedQuarter(value)}>
+                  <SelectTrigger className='w-[180px]'>
+                    <SelectValue placeholder='Filter quarter' />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value='all'>All Quarters</SelectItem>
+                    <SelectItem value='1st'>1st Quarter</SelectItem>
+                    <SelectItem value='2nd'>2nd Quarter</SelectItem>
+                    <SelectItem value='3rd'>3rd Quarter</SelectItem>
+                    <SelectItem value='4th'>4th Quarter</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button className='' onClick={handleOpenAdd}>
+                  Add Activity
+                </Button>
+              </div>
               <div className='flex flex-col h-full'>
                 <div className='border rounded-lg w-full h-0 flex-grow overflow-y-auto'>
                   <Table>
@@ -96,7 +129,7 @@ export default function ActivitiesPage() {
                           Number of Questions
                         </TableHead>
                         <TableHead className='w-1/4'>Subject</TableHead>
-                        <TableHead className='w-1/4'>Type</TableHead>
+                        <TableHead className='w-1/4'>Quarter</TableHead>
                         <TableHead className='text-center'>Actions</TableHead>
                       </TableRow>
                     </TableHeader>
