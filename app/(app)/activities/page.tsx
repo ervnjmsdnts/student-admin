@@ -34,11 +34,21 @@ export default function ActivitiesPage() {
   const [selectedQuarter, setSelectedQuarter] = useState<string | undefined>(
     undefined,
   );
+  const [selectedSubject, setSelectedSubject] = useState<string | undefined>(
+    undefined,
+  );
 
-  const sortedActivities =
-    selectedQuarter === 'all' || selectedQuarter === undefined
-      ? activities
-      : activities.filter((act) => act.type === selectedQuarter);
+  const sortedActivities = activities.filter((activity) => {
+    const matchesQuarter =
+      selectedQuarter === 'all' ||
+      selectedQuarter === undefined ||
+      activity.type === selectedQuarter;
+    const matchesSubject =
+      selectedSubject === 'all' ||
+      selectedSubject === undefined ||
+      activity.subject === selectedSubject;
+    return matchesQuarter && matchesSubject;
+  });
 
   const { currentItems, currentPage, paginate, totalPages } =
     usePagination(sortedActivities);
@@ -100,21 +110,37 @@ export default function ActivitiesPage() {
           <>
             <div className='flex-grow flex w-full h-full gap-2 flex-col'>
               <div className='flex items-center justify-between'>
-                <Select
-                  value={selectedQuarter}
-                  defaultValue='all'
-                  onValueChange={(value) => setSelectedQuarter(value)}>
-                  <SelectTrigger className='w-[180px]'>
-                    <SelectValue placeholder='Filter quarter' />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value='all'>All Quarters</SelectItem>
-                    <SelectItem value='1st'>1st Quarter</SelectItem>
-                    <SelectItem value='2nd'>2nd Quarter</SelectItem>
-                    <SelectItem value='3rd'>3rd Quarter</SelectItem>
-                    <SelectItem value='4th'>4th Quarter</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className='flex items-center gap-2'>
+                  <Select
+                    value={selectedQuarter}
+                    defaultValue='all'
+                    onValueChange={(value) => setSelectedQuarter(value)}>
+                    <SelectTrigger className='w-[180px]'>
+                      <SelectValue placeholder='Filter quarter' />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value='all'>All Quarters</SelectItem>
+                      <SelectItem value='1st'>1st Quarter</SelectItem>
+                      <SelectItem value='2nd'>2nd Quarter</SelectItem>
+                      <SelectItem value='3rd'>3rd Quarter</SelectItem>
+                      <SelectItem value='4th'>4th Quarter</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select
+                    value={selectedSubject}
+                    defaultValue='all'
+                    onValueChange={(value) => setSelectedSubject(value)}>
+                    <SelectTrigger className='w-[180px]'>
+                      <SelectValue placeholder='Filter subject' />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value='all'>All Subjects</SelectItem>
+                      <SelectItem value='english'>English</SelectItem>
+                      <SelectItem value='filipino'>Filipino</SelectItem>
+                      <SelectItem value='math'>Mathematics</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
                 <Button className='' onClick={handleOpenAdd}>
                   Add Activity
                 </Button>

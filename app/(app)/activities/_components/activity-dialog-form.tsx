@@ -28,13 +28,8 @@ import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
 import { FileImage, Loader2, X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import {
-  Controller,
-  UseFormRegister,
-  useFieldArray,
-  useForm,
-} from 'react-hook-form';
+import { useState } from 'react';
+import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 type ActivityForm = {
@@ -73,38 +68,11 @@ const questionSchema = z.object({
   question: z
     .string({ required_error: 'Question is required' })
     .min(1, 'Question is required'),
-  options: z
-    .array(
-      z
-        .string({ required_error: 'Option is required' })
-        .min(2, 'Option is required'),
-    )
-    .superRefine((options, ctx) => {
-      if (options.length < 2) {
-        ctx.addIssue({
-          code: 'custom',
-          message: 'At least two options are required',
-        });
-      } else if (options.length > 2) {
-        if (options[2] === undefined || options[2].trim() === '') {
-          ctx.addIssue({
-            code: 'custom',
-            path: [2],
-            message: 'Option 3 is required if present',
-          });
-        }
-        if (
-          options.length > 3 &&
-          (options[3] === undefined || options[3].trim() === '')
-        ) {
-          ctx.addIssue({
-            code: 'custom',
-            path: [3],
-            message: 'Option 4 is required if present',
-          });
-        }
-      }
-    }),
+  options: z.array(
+    z
+      .string({ required_error: 'Option is required' })
+      .min(4, 'Option is required'),
+  ),
   answer: z
     .string({ required_error: 'Answer is required' })
     .min(1, 'Answer is required'),
@@ -134,10 +102,9 @@ export default function ActivityDialogForm({
   onClose,
 }: ActivityForm) {
   const [isLoading, setIsLoading] = useState(false);
-  const [more, setMore] = useState<{ [key: number]: boolean }>({});
   const defaultFieldValues: Question = {
     answer: '0',
-    options: ['', ''],
+    options: ['', '', '', ''],
     question: '',
     image: null,
   };
@@ -165,8 +132,6 @@ export default function ActivityDialogForm({
 
   const router = useRouter();
   const { toast } = useToast();
-
-  console.log(form.formState.errors);
 
   const onSubmit = async (data: FormData) => {
     const questions = await Promise.all(
@@ -248,31 +213,6 @@ export default function ActivityDialogForm({
       }
     }
   };
-
-  const handleAddOptions = (index: number) => {
-    setMore((prev) => ({ ...prev, [index]: true }));
-  };
-
-  const handleRemoveOptions = (index: number) => {
-    setMore((prev) => ({ ...prev, [index]: false }));
-    form.unregister(`questions.${index}.options.2`);
-    form.unregister(`questions.${index}.options.3`);
-    const updatedOptions = form
-      .getValues(`questions.${index}.options`)
-      .slice(0, 2);
-    form.setValue(`questions.${index}.options`, updatedOptions);
-  };
-
-  useEffect(() => {
-    // Initialize moreOptions state for existing questions
-    if (activity) {
-      const initialMoreOptions = activity.questions.reduce((acc, q, index) => {
-        acc[index] = q.options.length > 2;
-        return acc;
-      }, {} as { [key: number]: boolean });
-      setMore(initialMoreOptions);
-    }
-  }, [activity]);
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -377,7 +317,9 @@ export default function ActivityDialogForm({
                               target='_blank'
                               href={activity.questions[index].imageUrl!}>
                               <FileImage className='w-4 h-4 mr-2' />
-                              <span>{activity.questions[index].imageName}</span>
+                              <span className='max-w-32 truncate'>
+                                {activity.questions[index].imageName}
+                              </span>
                             </Link>
                           </Button>
                         )}
@@ -437,39 +379,22 @@ export default function ActivityDialogForm({
                             {...form.register(`questions.${index}.options.1`)}
                           />
                         </div>
-                        {more[index] && (
-                          <>
-                            <div className='flex items-center gap-1.5'>
-                              <RadioGroupItem value='2' />
-                              <Input
-                                id={`options-${index}-2`}
-                                placeholder='Option 3'
-                                {...form.register(
-                                  `questions.${index}.options.2`,
-                                )}
-                              />
-                            </div>
-                            <div className='flex items-center gap-1.5'>
-                              <RadioGroupItem value='3' />
-                              <Input
-                                id={`options-${index}-3`}
-                                placeholder='Option 4'
-                                {...form.register(
-                                  `questions.${index}.options.3`,
-                                )}
-                              />
-                            </div>
-                          </>
-                        )}
-                        <Button
-                          type='button'
-                          onClick={() =>
-                            more[index]
-                              ? handleRemoveOptions(index)
-                              : handleAddOptions(index)
-                          }>
-                          {more[index] ? 'Remove Options' : 'Add Options'}
-                        </Button>
+                        <div className='flex items-center gap-1.5'>
+                          <RadioGroupItem value='2' />
+                          <Input
+                            id={`options-${index}-2`}
+                            placeholder='Option 3'
+                            {...form.register(`questions.${index}.options.2`)}
+                          />
+                        </div>
+                        <div className='flex items-center gap-1.5'>
+                          <RadioGroupItem value='3' />
+                          <Input
+                            id={`options-${index}-3`}
+                            placeholder='Option 4'
+                            {...form.register(`questions.${index}.options.3`)}
+                          />
+                        </div>
                       </RadioGroup>
                     )}
                   />

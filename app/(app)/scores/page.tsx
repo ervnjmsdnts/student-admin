@@ -16,12 +16,37 @@ import { useEffect, useState } from 'react';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { format } from 'date-fns';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 export default function ScoresPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [scores, setScores] = useState<Score[]>([]);
+  const [selectedQuarter, setSelectedQuarter] = useState<string | undefined>(
+    undefined,
+  );
+  const [selectedSubject, setSelectedSubject] = useState<string | undefined>(
+    undefined,
+  );
+
+  const sortedScores = scores.filter((score) => {
+    const matchesQuarter =
+      selectedQuarter === 'all' ||
+      selectedQuarter === undefined ||
+      score.type === selectedQuarter;
+    const matchesSubject =
+      selectedSubject === 'all' ||
+      selectedSubject === undefined ||
+      score.subject === selectedSubject;
+    return matchesQuarter && matchesSubject;
+  });
   const { currentItems, currentPage, paginate, totalPages } =
-    usePagination(scores);
+    usePagination(sortedScores);
 
   useEffect(() => {
     (() => {
@@ -50,7 +75,38 @@ export default function ScoresPage() {
       ) : (
         <>
           <div className='flex-grow flex w-full h-full gap-2 flex-col'>
-            <div className='flex flex-col h-full'>
+            <div className='flex flex-col gap-2 h-full'>
+              <div className='flex items-center gap-2'>
+                <Select
+                  value={selectedQuarter}
+                  defaultValue='all'
+                  onValueChange={(value) => setSelectedQuarter(value)}>
+                  <SelectTrigger className='w-[180px]'>
+                    <SelectValue placeholder='Filter quarter' />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value='all'>All Quarters</SelectItem>
+                    <SelectItem value='1st'>1st Quarter</SelectItem>
+                    <SelectItem value='2nd'>2nd Quarter</SelectItem>
+                    <SelectItem value='3rd'>3rd Quarter</SelectItem>
+                    <SelectItem value='4th'>4th Quarter</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={selectedSubject}
+                  defaultValue='all'
+                  onValueChange={(value) => setSelectedSubject(value)}>
+                  <SelectTrigger className='w-[180px]'>
+                    <SelectValue placeholder='Filter subject' />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value='all'>All Subjects</SelectItem>
+                    <SelectItem value='english'>English</SelectItem>
+                    <SelectItem value='filipino'>Filipino</SelectItem>
+                    <SelectItem value='math'>Mathematics</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               <div className='border rounded-lg w-full h-0 flex-grow overflow-y-auto'>
                 <Table>
                   <TableHeader>
